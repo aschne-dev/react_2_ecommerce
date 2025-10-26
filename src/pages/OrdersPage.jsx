@@ -2,6 +2,8 @@ import { Link } from "react-router";
 import Header from "../components/Header";
 import "./OrdersPage.css";
 
+import buyAgainIcon from "../assets/images/icons/buy-again.png";
+
 export default function OrdersPage() {
   return (
     <>
@@ -45,10 +47,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="product-quantity">Quantity: 1</div>
                 <button className="buy-again-button button-primary">
-                  <img
-                    className="buy-again-icon"
-                    src="images/icons/buy-again.png"
-                  />
+                  <img className="buy-again-icon" src={buyAgainIcon} />
                   <span className="buy-again-message">Add to Cart</span>
                 </button>
               </div>
@@ -74,10 +73,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="product-quantity">Quantity: 2</div>
                 <button className="buy-again-button button-primary">
-                  <img
-                    className="buy-again-icon"
-                    src="images/icons/buy-again.png"
-                  />
+                  <img className="buy-again-icon" src={buyAgainIcon} />
                   <span className="buy-again-message">Add to Cart</span>
                 </button>
               </div>
@@ -125,18 +121,19 @@ export default function OrdersPage() {
                 <button className="buy-again-button button-primary">
                   <img
                     className="buy-again-icon"
-                    src="images/icons/buy-again.png"
+                    src={buyAgainIcon}
+                    alt="Buy again"
                   />
                   <span className="buy-again-message">Add to Cart</span>
                 </button>
               </div>
 
               <div className="product-actions">
-                <Linkg to="/tracking">
+                <Link to="/tracking">
                   <button className="track-package-button button-secondary">
                     Track package
                   </button>
-                </Linkg>
+                </Link>
               </div>
             </div>
           </div>
