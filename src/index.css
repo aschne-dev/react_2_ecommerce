@@ -107,5 +107,42 @@ input:focus {
 }
 
 .not-found {
-  margin: 100px;
+  min-height: calc(100vh - 130px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  text-align: center;
+  color: rgb(33, 33, 33);
+}
+
+.not-found h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.not-found p {
+  font-size: 16px;
+  color: rgb(95, 95, 95);
+  max-width: 420px;
+}
+
+.not-found a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  background-color: rgb(25, 135, 84);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.not-found a:hover {
+  background-color: rgb(21, 115, 71);
 }
