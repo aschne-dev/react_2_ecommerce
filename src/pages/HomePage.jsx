@@ -3,6 +3,18 @@ import Header from "../components/Header";
 import "./HomePage.css";
 
 export default function HomePage() {
+  // STATE
+
+  // COMPORTEMENTS
+  fetch("http://localhost:3000/api/products")
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+    });
+
+  // RENDER
   return (
     <>
       <title>Ecommerce Project</title>
