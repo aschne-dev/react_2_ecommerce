@@ -1,15 +1,18 @@
 import axios from "axios";
-import { products } from "../../starting-code/data/products";
+import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import "./HomePage.css";
 
 export default function HomePage() {
   // STATE
+  const [products, setProducts] = useState([]);
 
   // COMPORTEMENTS
-  axios.get("http://localhost:3000/api/products").then((response) => {
-    console.log(response.data);
-  });
+  useEffect(() => {
+    axios.get("http://localhost:3000/api/products").then((response) => {
+      setProducts(response.data);
+    });
+  }, []);
 
   // RENDER
   return (
