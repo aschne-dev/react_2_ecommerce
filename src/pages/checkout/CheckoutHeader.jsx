@@ -5,7 +5,7 @@ import checkoutLockIcon from "../../assets/images/icons/checkout-lock-icon.png";
 import logo from "../../assets/images/logo.png";
 import mobileLogo from "../../assets/images/mobile-logo.png";
 
-export default function CheckoutHeader() {
+export default function CheckoutHeader({ paymentSummary }) {
   return (
     <div className="checkout-header">
       <div className="header-content">
@@ -19,7 +19,7 @@ export default function CheckoutHeader() {
         <div className="checkout-header-middle-section">
           Checkout (
           <Link className="return-to-home-link" to="/">
-            3 items
+            {paymentSummary && paymentSummary.totalItems} items
           </Link>
           )
         </div>

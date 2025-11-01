@@ -34,7 +34,7 @@ export default function CheckoutPage({ cart }) {
       <div className="checkout-page">
         <div className="page-title">Review your order</div>
 
-        <CheckoutHeader />
+        <CheckoutHeader paymentSummary={paymentSummary} />
 
         <div className="checkout-grid">
           <OrderSummary cart={cart} deliveryOptions={deliveryOptions} />
