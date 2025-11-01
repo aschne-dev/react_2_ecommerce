@@ -1,12 +1,12 @@
 import { Link } from "react-router";
-import Header from "../components/Header";
+import Header from "../../components/Header";
 import "./OrdersPage.css";
 
 import axios from "axios";
 import dayjs from "dayjs";
 import { Fragment, useEffect, useState } from "react";
-import buyAgainIcon from "../assets/images/icons/buy-again.png";
-import { formatMoney } from "../utils/money";
+import buyAgainIcon from "../../assets/images/icons/buy-again.png";
+import { formatMoney } from "../../utils/money";
 
 export default function OrdersPage({ cart }) {
   // STATE
