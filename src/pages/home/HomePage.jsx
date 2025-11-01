@@ -10,9 +10,12 @@ export default function HomePage({ cart }) {
 
   // COMPORTEMENTS
   useEffect(() => {
-    axios.get("api/products").then((response) => {
+    const getHomeData = async () => {
+      const response = await axios.get("api/products");
       setProducts(response.data);
-    });
+    };
+
+    getHomeData();
   }, []);
 
   // RENDER

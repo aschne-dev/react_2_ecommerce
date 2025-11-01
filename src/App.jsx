@@ -14,9 +14,12 @@ function App() {
 
   // COMPORTEMENTS
   useEffect(() => {
-    axios.get("api/cart-items?expand=product").then((response) => {
+    const getCartData = async () => {
+      const response = await axios.get("api/cart-items?expand=product");
       setCart(response.data);
-    });
+    };
+
+    getCartData();
   }, []);
 
   // RENDER
