@@ -1,8 +1,8 @@
-import axios from "axios";
 import dayjs from "dayjs";
 import { Fragment } from "react";
 import { Link } from "react-router";
 import buyAgainIcon from "../../assets/images/icons/buy-again.png";
+import { addProductToCart } from "../../utils/cartActions";
 
 export default function OrderDetailsGrid({ order, loadCart }) {
   // COMPORTEMENT
@@ -13,11 +13,7 @@ export default function OrderDetailsGrid({ order, loadCart }) {
       {order.products.map((orderProduct) => {
         // ADD TO CART FUNCTION
         const addToCart = async () => {
-          await axios.post("/api/cart-items", {
-            productId: orderProduct.product.id,
-            quantity: 1,
-          });
-          await loadCart();
+          await addProductToCart(orderProduct.product.id, 1, loadCart);
         };
 
         return (

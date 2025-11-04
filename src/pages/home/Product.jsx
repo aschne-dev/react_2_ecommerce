@@ -1,6 +1,6 @@
-import axios from "axios";
 import { useState } from "react";
 import { formatMoney } from "../../utils/money";
+import { addProductToCart } from "../../utils/cartActions";
 
 export default function Product({ product, loadCart }) {
   //STATE
@@ -9,11 +9,7 @@ export default function Product({ product, loadCart }) {
 
   // COMPORTEMENTS
   const addToCart = async () => {
-    await axios.post("/api/cart-items", {
-      productId: product.id,
-      quantity,
-    });
-    await loadCart();
+    await addProductToCart(product.id, quantity, loadCart);
     setProductAdded(true);
     setTimeout(() => {
       setProductAdded(false);
