@@ -5,6 +5,7 @@ import { formatMoney } from "../../utils/money";
 export default function Product({ product, loadCart }) {
   //STATE
   const [quantity, setQuantity] = useState(1);
+  const [productAdded, setProductAdded] = useState(false);
 
   // COMPORTEMENTS
   const addToCart = async () => {
@@ -13,6 +14,10 @@ export default function Product({ product, loadCart }) {
       quantity,
     });
     await loadCart();
+    setProductAdded(true);
+    setTimeout(() => {
+      setProductAdded(false);
+    }, 2000);
   };
 
   const selectQuantity = (event) => {
@@ -58,7 +63,7 @@ export default function Product({ product, loadCart }) {
 
       <div className="product-spacer"></div>
 
-      <div className="added-to-cart">
+      <div className="added-to-cart" style={{ opacity: productAdded ? 1 : 0 }}>
         <img src="images/icons/checkmark.png" />
         Added
       </div>
