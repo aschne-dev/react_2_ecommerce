@@ -146,3 +146,7 @@ input:focus {
 .not-found a:hover {
   background-color: rgb(21, 115, 71);
 }
+
+.product-quantity input {
+  width: 50px;
+}
