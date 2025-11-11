@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,12 +10,23 @@ vi.mock("axios");
 describe("HomePage component", () => {
   let loadCart;
 
+  async function renderHomePageAndGetProducts() {
+    render(
+      <MemoryRouter>
+        <HomePage cart={[]} loadCart={loadCart} />
+      </MemoryRouter>
+    );
+
+    // Wait for product cards before interacting or asserting.
+    return await screen.findAllByTestId("product-container");
+  }
+
   beforeEach(() => {
     loadCart = vi.fn();
 
     // Stub the catalog request so we always render a predictable list of products.
-    axios.get.mockImplementation(async (urlPath) => {
-      // if (urlPath === "/api/products") {
+    axios.get.mockImplementation(async () => {
+      // Only the products endpoint is relevant for these tests.
       return {
         data: [
           {
@@ -41,19 +53,11 @@ describe("HomePage component", () => {
           },
         ],
       };
-      /*}*/
     });
   });
 
   it("displays the products correct", async () => {
-    render(
-      <MemoryRouter>
-        <HomePage cart={[]} loadCart={loadCart} />
-      </MemoryRouter>
-    );
-
-    // Wait for both product cards to render before asserting their content.
-    const productContainers = await screen.findAllByTestId("product-container");
+    const productContainers = await renderHomePageAndGetProducts();
     expect(productContainers.length).toBe(2);
 
     expect(
@@ -65,5 +69,49 @@ describe("HomePage component", () => {
     expect(
       within(productContainers[1]).getByText("Intermediate Size Basketball")
     ).toBeInTheDocument();
+  });
+
+  it("Add a product to the cart", async () => {
+    let addToCartButton;
+    let quantitySelector;
+
+    const productContainers = await renderHomePageAndGetProducts();
+
+    const user = userEvent.setup();
+
+    // Simulate add-to-cart flow for the first product.
+    addToCartButton = within(productContainers[0]).getByTestId(
+      "add-to-cart-button"
+    );
+    quantitySelector = within(productContainers[0]).getByTestId(
+      "quantity-selector"
+    );
+
+    // Change quantity before adding to the cart.
+    await user.selectOptions(quantitySelector, "2");
+    await user.click(addToCartButton);
+
+    // Repeat the flow for the second product to cover multiple entries.
+    addToCartButton = within(productContainers[1]).getByTestId(
+      "add-to-cart-button"
+    );
+    quantitySelector = within(productContainers[1]).getByTestId(
+      "quantity-selector"
+    );
+    // Different quantity to ensure payload respects the selector value.
+    await user.selectOptions(quantitySelector, "3");
+    await user.click(addToCartButton);
+
+    expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
+      productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
+      quantity: 2,
+    });
+    expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
+      productId: "15b6fc6f-327a-4ec4-896f-486349e85a3d",
+      quantity: 3,
+    });
+
+    // Every submission should refresh the cart summary.
+    expect(loadCart).toHaveBeenCalledTimes(2);
   });
 });

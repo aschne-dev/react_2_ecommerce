@@ -12,7 +12,7 @@ describe("Product component", () => {
   let user;
 
   beforeEach(() => {
-    // Keep a single representative product fixture so every test asserts the same values.
+    // Shared fixture keeps expectations consistent across tests.
     product = {
       id: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       image: "images/products/athletic-cotton-socks-6-pairs.jpg",
@@ -32,7 +32,7 @@ describe("Product component", () => {
   it("displays the product details correctly", () => {
     render(<Product product={product} loadCart={loadCart} />);
 
-    // Rendering assertions ensure the UI keeps showing every key attribute.
+    // Assert every important product detail renders.
     expect(
       screen.getByText("Black and Gray Athletic Cotton Socks - 6 Pairs")
     ).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe("Product component", () => {
     const addToCartButton = screen.getByTestId("add-to-cart-button");
     await user.click(addToCartButton);
 
-    // Adding to cart should hit the API and refresh the cart state hook.
+    // Quantity changes should drive the API payload and trigger a cart reload.
     expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 3,
@@ -74,7 +74,7 @@ describe("Product component", () => {
     const addToCartButton = screen.getByTestId("add-to-cart-button");
     await user.click(addToCartButton);
 
-    // Adding to cart should hit the API and refresh the cart state hook.
+    // Default add-to-cart uses quantity 1 and still refreshes cart state.
     expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 1,
