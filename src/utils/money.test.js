@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { formatMoney } from "./money";
 
+// Guard against regressions in how we format raw cent values into USD strings.
+
 describe("formatMoney", () => {
   it("formats 1999 cents as $19.99", () => {
     expect(formatMoney(1999)).toBe("$19.99");

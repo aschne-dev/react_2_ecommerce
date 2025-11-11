@@ -11,6 +11,7 @@ describe("Product component", () => {
   let loadCart;
 
   beforeEach(() => {
+    // Keep a single representative product fixture so every test asserts the same values.
     product = {
       id: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       image: "images/products/athletic-cotton-socks-6-pairs.jpg",
@@ -29,6 +30,7 @@ describe("Product component", () => {
   it("displays the product details correctly", () => {
     render(<Product product={product} loadCart={loadCart} />);
 
+    // Rendering assertions ensure the UI keeps showing every key attribute.
     expect(
       screen.getByText("Black and Gray Athletic Cotton Socks - 6 Pairs")
     ).toBeInTheDocument();
@@ -51,6 +53,7 @@ describe("Product component", () => {
     const addToCartButton = screen.getByTestId("add-to-cart-button");
     await user.click(addToCartButton);
 
+    // Adding to cart should hit the API and refresh the cart state hook.
     expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 1,
