@@ -1,5 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import userEvent from "@testing-library/user-event";
+import axios from "axios";
+import { MemoryRouter, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PaymentSummary from "./PaymentSummary";
 
@@ -10,9 +12,15 @@ describe("Payment Summary Component", () => {
   let paymentSummary;
 
   async function renderPaymentSummary() {
+    function Location() {
+      const location = useLocation();
+      return <div data-testid="url-path">{location.pathname}</div>;
+    }
+
     render(
       <MemoryRouter>
         <PaymentSummary paymentSummary={paymentSummary} loadCart={loadCart} />
+        <Location />
       </MemoryRouter>
     );
 
@@ -57,5 +65,18 @@ describe("Payment Summary Component", () => {
     expect(
       within(paymentSummaryContainers[4]).getByText("$229.64")
     ).toBeInTheDocument();
+  });
+
+  it("Place the order", async () => {
+    await renderPaymentSummary();
+
+    const user = userEvent.setup();
+    const placeOrderButton = screen.getByTestId("create-order-button");
+
+    await user.click(placeOrderButton);
+
+    expect(axios.post).toHaveBeenCalledWith("/api/orders");
+    expect(loadCart).toHaveBeenCalled();
+    expect(screen.getByTestId("url-path")).toHaveTextContent("/orders");
   });
 });
