@@ -24,12 +24,14 @@ describe("Payment Summary Component", () => {
       </MemoryRouter>
     );
 
+    // Wait until every payment-summary row is on screen before returning.
     return await screen.findAllByTestId("payment-summary-container");
   }
 
   beforeEach(() => {
     loadCart = vi.fn();
 
+    // Shared summary fixture mirrors the API payload structure.
     paymentSummary = {
       totalItems: 11,
       productCostCents: 20377,
@@ -44,6 +46,7 @@ describe("Payment Summary Component", () => {
     const paymentSummaryContainers = await renderPaymentSummary();
     expect(paymentSummaryContainers.length).toBe(5);
 
+    // First row shows the subtotal.
     expect(paymentSummaryContainers[0]).toHaveTextContent("$203.77");
 
     expect(
@@ -73,6 +76,7 @@ describe("Payment Summary Component", () => {
     const user = userEvent.setup();
     const placeOrderButton = screen.getByTestId("create-order-button");
 
+    // Clicking CTA should submit the order, refresh cart and navigate.
     await user.click(placeOrderButton);
 
     expect(axios.post).toHaveBeenCalledWith("/api/orders");
