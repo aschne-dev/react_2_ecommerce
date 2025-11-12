@@ -1,5 +1,6 @@
-import axios from "axios";
 import { useState } from "react";
+import { api } from "../../lib/api";
+import { buildAssetUrl } from "../../lib/assets";
 import { formatMoney } from "../../utils/money";
 
 export default function CartItemDetails({
@@ -36,7 +37,7 @@ export default function CartItemDetails({
 
   const updateCart = async () => {
     const quantitySelected = Number(quantity);
-    await axios.put(`/api/cart-items/${cartItem.product.id}`, {
+    await api.put(`/cart-items/${cartItem.product.id}`, {
       quantity: quantitySelected,
     });
     await loadCart();
@@ -45,7 +46,10 @@ export default function CartItemDetails({
   // RENDER
   return (
     <>
-      <img className="product-image" src={cartItem.product.image} />
+      <img
+        className="product-image"
+        src={buildAssetUrl(cartItem.product.image)}
+      />
 
       <div className="cart-item-details">
         <div className="product-name">{cartItem.product.name}</div>

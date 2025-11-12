@@ -1,10 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Product from "./Product";
 
-vi.mock("axios");
+const mockApi = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+}));
+
+vi.mock("../../lib/api", () => ({
+  api: mockApi,
+}));
 
 describe("Product component", () => {
   let product;
@@ -25,6 +33,7 @@ describe("Product component", () => {
       keywords: ["socks", "sports", "apparel"],
     };
 
+    vi.clearAllMocks();
     loadCart = vi.fn();
     user = userEvent.setup();
   });
@@ -39,11 +48,11 @@ describe("Product component", () => {
     expect(screen.getByText("$10.90")).toBeInTheDocument();
     expect(screen.getByTestId("product-image")).toHaveAttribute(
       "src",
-      "images/products/athletic-cotton-socks-6-pairs.jpg"
+      "/images/products/athletic-cotton-socks-6-pairs.jpg"
     );
     expect(screen.getByTestId("product-rating-stars-image")).toHaveAttribute(
       "src",
-      "images/ratings/rating-45.png"
+      "/images/ratings/rating-45.png"
     );
     expect(screen.getByText("87")).toBeInTheDocument();
   });
@@ -61,7 +70,7 @@ describe("Product component", () => {
     await user.click(addToCartButton);
 
     // Quantity changes should drive the API payload and trigger a cart reload.
-    expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
+    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 3,
     });
@@ -75,7 +84,7 @@ describe("Product component", () => {
     await user.click(addToCartButton);
 
     // Default add-to-cart uses quantity 1 and still refreshes cart state.
-    expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
+    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 1,
     });

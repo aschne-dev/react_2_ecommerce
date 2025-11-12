@@ -1,7 +1,8 @@
-import axios from "axios";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
+import { api } from "../lib/api";
+import { buildAssetUrl } from "../lib/assets";
 import Header from "../components/Header";
 import "./TrackingPage.css";
 
@@ -44,8 +45,8 @@ export default function TrackingPage({ cart }) {
   // Fetch the order whenever the orderId/productId parameters change
   useEffect(() => {
     const fetchTrackingData = async () => {
-      const response = await axios.get(
-        `/api/orders/${orderId}?expand=products`
+      const response = await api.get(
+        `/orders/${orderId}?expand=products`
       );
 
       const trackedProductCopy = response.data.products.find(
@@ -87,7 +88,10 @@ export default function TrackingPage({ cart }) {
             Quantity: {trackedProduct.quantity}
           </div>
 
-          <img className="product-image" src={trackedProduct.product.image} />
+          <img
+            className="product-image"
+            src={buildAssetUrl(trackedProduct.product.image)}
+          />
 
           <div className="progress-labels-container">
             <div

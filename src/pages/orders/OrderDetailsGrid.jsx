@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { Link } from "react-router";
 import buyAgainIcon from "../../assets/images/icons/buy-again.png";
 import { addProductToCart } from "../../utils/cartActions";
+import { buildAssetUrl } from "../../lib/assets";
 
 export default function OrderDetailsGrid({ order, loadCart }) {
   // COMPORTEMENT
@@ -19,7 +20,7 @@ export default function OrderDetailsGrid({ order, loadCart }) {
         return (
           <Fragment key={orderProduct.product.id}>
             <div className="product-image-container">
-              <img src={orderProduct.product.image} />
+              <img src={buildAssetUrl(orderProduct.product.image)} />
             </div>
 
             <div className="product-details">

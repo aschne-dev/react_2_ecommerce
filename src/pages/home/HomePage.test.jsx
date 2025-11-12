@@ -1,11 +1,19 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import axios from "axios";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import HomePage from "./HomePage";
 
-vi.mock("axios");
+const mockApi = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+}));
+
+vi.mock("../../lib/api", () => ({
+  api: mockApi,
+}));
 
 describe("HomePage component", () => {
   let loadCart;
@@ -22,10 +30,11 @@ describe("HomePage component", () => {
   }
 
   beforeEach(() => {
+    vi.clearAllMocks();
     loadCart = vi.fn();
 
     // Stub the catalog request so we always render a predictable list of products.
-    axios.get.mockImplementation(async () => {
+    mockApi.get.mockImplementation(async () => {
       // Only the products endpoint is relevant for these tests.
       return {
         data: [
@@ -102,11 +111,11 @@ describe("HomePage component", () => {
     await user.selectOptions(quantitySelector, "3");
     await user.click(addToCartButton);
 
-    expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
+    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 2,
     });
-    expect(axios.post).toHaveBeenCalledWith("/api/cart-items", {
+    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
       productId: "15b6fc6f-327a-4ec4-896f-486349e85a3d",
       quantity: 3,
     });

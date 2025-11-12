@@ -1,11 +1,19 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import axios from "axios";
 import { MemoryRouter, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PaymentSummary from "./PaymentSummary";
 
-vi.mock("axios");
+const mockApi = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
+}));
+
+vi.mock("../../lib/api", () => ({
+  api: mockApi,
+}));
 
 describe("Payment Summary Component", () => {
   let loadCart;
@@ -29,6 +37,7 @@ describe("Payment Summary Component", () => {
   }
 
   beforeEach(() => {
+    vi.clearAllMocks();
     loadCart = vi.fn();
 
     // Shared summary fixture mirrors the API payload structure.
@@ -79,7 +88,7 @@ describe("Payment Summary Component", () => {
     // Clicking CTA should submit the order, refresh cart and navigate.
     await user.click(placeOrderButton);
 
-    expect(axios.post).toHaveBeenCalledWith("/api/orders");
+    expect(mockApi.post).toHaveBeenCalledWith("/orders");
     expect(loadCart).toHaveBeenCalled();
     expect(screen.getByTestId("url-path")).toHaveTextContent("/orders");
   });

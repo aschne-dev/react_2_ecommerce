@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { addProductToCart } from "../../utils/cartActions";
 import { formatMoney } from "../../utils/money";
+import { buildAssetUrl } from "../../lib/assets";
 
 export default function Product({ product, loadCart }) {
   //STATE
@@ -28,7 +29,7 @@ export default function Product({ product, loadCart }) {
         <img
           className="product-image"
           data-testid="product-image"
-          src={product.image}
+          src={buildAssetUrl(product.image)}
         />
       </div>
 
@@ -38,7 +39,7 @@ export default function Product({ product, loadCart }) {
         <img
           className="product-rating-stars"
           data-testid="product-rating-stars-image"
-          src={`images/ratings/rating-${product.rating.stars * 10}.png`}
+          src={buildAssetUrl(`images/ratings/rating-${product.rating.stars * 10}.png`)}
         />
         <div className="product-rating-count link-primary">
           {product.rating.count}
@@ -69,7 +70,7 @@ export default function Product({ product, loadCart }) {
       <div className="product-spacer"></div>
 
       <div className="added-to-cart" style={{ opacity: productAdded ? 1 : 0 }}>
-        <img src="images/icons/checkmark.png" />
+        <img src={buildAssetUrl("images/icons/checkmark.png")} />
         Added
       </div>
 
