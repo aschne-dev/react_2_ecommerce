@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import OrdersGrid from "./OrdersGrid";
 
-export default function OrdersPage({ cart, loadCart }) {
+export default function OrdersPage() {
   // STATE
   const [orders, setOrders] = useState([]);
 
@@ -24,12 +24,12 @@ export default function OrdersPage({ cart, loadCart }) {
     <>
       <title>Orders</title>
       <link rel="icon" type="image/svg+xml" href="/orders-favicon.png" />
-      <Header cart={cart} />
+      <Header />
 
       <div className="orders-page">
         <div className="page-title">Your Orders</div>
 
-        <OrdersGrid orders={orders} loadCart={loadCart} />
+        <OrdersGrid orders={orders} />
       </div>
     </>
   );

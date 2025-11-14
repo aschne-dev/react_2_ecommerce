@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
-import { api } from "../../lib/api";
 import Header from "../../components/Header";
+import { api } from "../../lib/api";
 import "./HomePage.css";
 import ProductsGrid from "./ProductsGrid";
 
-export default function HomePage({ cart, loadCart }) {
+export default function HomePage() {
   // STATE
   const [products, setProducts] = useState([]);
   const [searchParams] = useSearchParams();
@@ -29,10 +29,10 @@ export default function HomePage({ cart, loadCart }) {
       <title>Ecommerce Project</title>
       <link rel="icon" type="image/svg+xml" href="/home-favicon.png" />
 
-      <Header cart={cart} />
+      <Header />
 
       <div className="home-page">
-        <ProductsGrid products={products} loadCart={loadCart} />
+        <ProductsGrid products={products} />
       </div>
     </>
   );

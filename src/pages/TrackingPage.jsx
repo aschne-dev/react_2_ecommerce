@@ -1,12 +1,12 @@
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
+import Header from "../components/Header";
 import { api } from "../lib/api";
 import { buildAssetUrl } from "../lib/assets";
-import Header from "../components/Header";
 import "./TrackingPage.css";
 
-export default function TrackingPage({ cart }) {
+export default function TrackingPage() {
   // IDs coming from the URL (e.g. /tracking/:orderId/:productId)
   const { orderId, productId } = useParams();
   // Full order returned by the API
@@ -45,9 +45,7 @@ export default function TrackingPage({ cart }) {
   // Fetch the order whenever the orderId/productId parameters change
   useEffect(() => {
     const fetchTrackingData = async () => {
-      const response = await api.get(
-        `/orders/${orderId}?expand=products`
-      );
+      const response = await api.get(`/orders/${orderId}?expand=products`);
 
       const trackedProductCopy = response.data.products.find(
         // Pick the product that matches the productId provided in the URL
@@ -68,7 +66,7 @@ export default function TrackingPage({ cart }) {
     <>
       <title>Orders</title>
       <link rel="icon" type="image/svg+xml" href="/tracking-favicon.png" />
-      <Header cart={cart} />
+      <Header />
 
       <div className="tracking-page">
         <div className="order-tracking">

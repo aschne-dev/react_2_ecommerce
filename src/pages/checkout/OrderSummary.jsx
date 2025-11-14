@@ -1,9 +1,14 @@
+import { useCart } from "../../context/CartContext";
+import { api } from "../../lib/api";
 import CartItemDetails from "./CartItemDetails";
 import DeliveryDate from "./DeliveryDate";
 import DeliveryOptions from "./DeliveryOptions";
-import { api } from "../../lib/api";
 
-export default function OrderSummary({ cart, deliveryOptions, loadCart }) {
+export default function OrderSummary({ deliveryOptions }) {
+  // STATE
+  const { cart, loadCart } = useCart(); // Shared cart data + actions come from context.
+
+  // RENDER
   return (
     <div className="order-summary">
       {deliveryOptions.length > 0 &&
@@ -31,13 +36,11 @@ export default function OrderSummary({ cart, deliveryOptions, loadCart }) {
                 <CartItemDetails
                   cartItem={cartItem}
                   deleteCartItem={deleteCartItem}
-                  loadCart={loadCart}
                 />
 
                 <DeliveryOptions
                   cartItem={cartItem}
                   deliveryOptions={deliveryOptions}
-                  loadCart={loadCart}
                 />
               </div>
             </div>

@@ -12,9 +12,11 @@ import cartIcon from "../assets/images/icons/cart-icon.png";
 import searchIcon from "../assets/images/icons/search-icon.png";
 import logoWhite from "../assets/images/logo-white.png";
 import logoMobileWhite from "../assets/images/mobile-logo-white.png";
+import { useCart } from "../context/CartContext";
 
-export default function Header({ cart }) {
+export default function Header() {
   // STATE
+  const { cart } = useCart(); // Read cart count directly from shared context.
   // Track route to handle search submissions differently on home vs other pages.
   const location = useLocation();
   const navigate = useNavigate();
@@ -53,7 +55,9 @@ export default function Header({ cart }) {
       return;
     }
 
-    const paramsString = createSearchParams({ search: trimmedInput }).toString();
+    const paramsString = createSearchParams({
+      search: trimmedInput,
+    }).toString();
 
     if (location.pathname === "/") {
       // Already on home: update the query string in place.

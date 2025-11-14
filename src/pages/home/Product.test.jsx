@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CartContext } from "../../context/CartContext";
 import Product from "./Product";
 
 const mockApi = vi.hoisted(() => ({
@@ -39,7 +40,12 @@ describe("Product component", () => {
   });
 
   it("displays the product details correctly", () => {
-    render(<Product product={product} loadCart={loadCart} />);
+    const cartContextValue = { cart: [], loadCart };
+    render(
+      <CartContext.Provider value={cartContextValue}>
+        <Product product={product} />
+      </CartContext.Provider>
+    );
 
     // Assert every important product detail renders.
     expect(
@@ -58,7 +64,12 @@ describe("Product component", () => {
   });
 
   it("select a quantity", async () => {
-    render(<Product product={product} loadCart={loadCart} />);
+    const cartContextValue = { cart: [], loadCart };
+    render(
+      <CartContext.Provider value={cartContextValue}>
+        <Product product={product} />
+      </CartContext.Provider>
+    );
 
     const quantitySelector = screen.getByTestId("quantity-selector");
     expect(quantitySelector).toHaveValue("1");
@@ -78,7 +89,12 @@ describe("Product component", () => {
   });
 
   it("adds a product to the cart", async () => {
-    render(<Product product={product} loadCart={loadCart} />);
+    const cartContextValue = { cart: [], loadCart };
+    render(
+      <CartContext.Provider value={cartContextValue}>
+        <Product product={product} />
+      </CartContext.Provider>
+    );
 
     const addToCartButton = screen.getByTestId("add-to-cart-button");
     await user.click(addToCartButton);

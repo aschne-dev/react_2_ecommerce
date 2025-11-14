@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useCart } from "../../context/CartContext";
+import { buildAssetUrl } from "../../lib/assets";
 import { addProductToCart } from "../../utils/cartActions";
 import { formatMoney } from "../../utils/money";
-import { buildAssetUrl } from "../../lib/assets";
 
-export default function Product({ product, loadCart }) {
+export default function Product({ product }) {
   //STATE
+  const { loadCart } = useCart(); // Shared cart updater avoids prop drilling.
   const [quantity, setQuantity] = useState(1);
   const [productAdded, setProductAdded] = useState(false);
 
@@ -39,7 +41,9 @@ export default function Product({ product, loadCart }) {
         <img
           className="product-rating-stars"
           data-testid="product-rating-stars-image"
-          src={buildAssetUrl(`images/ratings/rating-${product.rating.stars * 10}.png`)}
+          src={buildAssetUrl(
+            `images/ratings/rating-${product.rating.stars * 10}.png`
+          )}
         />
         <div className="product-rating-count link-primary">
           {product.rating.count}
