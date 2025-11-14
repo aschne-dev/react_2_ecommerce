@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { useCart } from "../../context/CartContext";
+import { api } from "../../lib/api";
 import CheckoutHeader from "./CheckoutHeader";
 import "./CheckoutPage.css";
 import OrderSummary from "./OrderSummary";
 import PaymentSummary from "./PaymentSummary";
-import { api } from "../../lib/api";
 
-export default function CheckoutPage({ cart, loadCart }) {
+export default function CheckoutPage() {
   // STATE
+  const { cart } = useCart(); // Context keeps cart total consistent across tabs.
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [paymentSummary, setPaymentSummary] = useState(null);
 
@@ -43,12 +45,8 @@ export default function CheckoutPage({ cart, loadCart }) {
         <CheckoutHeader paymentSummary={paymentSummary} />
 
         <div className="checkout-grid">
-          <OrderSummary
-            cart={cart}
-            deliveryOptions={deliveryOptions}
-            loadCart={loadCart}
-          />
-          <PaymentSummary paymentSummary={paymentSummary} loadCart={loadCart} />
+          <OrderSummary cart={cart} deliveryOptions={deliveryOptions} />
+          <PaymentSummary paymentSummary={paymentSummary} />
         </div>
       </div>
     </>

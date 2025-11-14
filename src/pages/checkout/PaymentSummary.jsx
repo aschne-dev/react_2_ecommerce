@@ -1,8 +1,12 @@
 import { useNavigate } from "react-router";
-import { formatMoney } from "../../utils/money";
+import { useCart } from "../../context/CartContext";
 import { api } from "../../lib/api";
+import { formatMoney } from "../../utils/money";
 
-export default function PaymentSummary({ paymentSummary, loadCart }) {
+export default function PaymentSummary({ paymentSummary }) {
+  // STATE
+  const { loadCart } = useCart(); // Context ensures cart refresh happens app-wide.
+
   // COMPORTEMENTS
   const navigate = useNavigate();
 

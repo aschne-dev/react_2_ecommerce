@@ -2,11 +2,13 @@ import dayjs from "dayjs";
 import { Fragment } from "react";
 import { Link } from "react-router";
 import buyAgainIcon from "../../assets/images/icons/buy-again.png";
-import { addProductToCart } from "../../utils/cartActions";
+import { useCart } from "../../context/CartContext";
 import { buildAssetUrl } from "../../lib/assets";
+import { addProductToCart } from "../../utils/cartActions";
 
-export default function OrderDetailsGrid({ order, loadCart }) {
-  // COMPORTEMENT
+export default function OrderDetailsGrid({ order }) {
+  // STATE
+  const { loadCart } = useCart(); // Reuse context action when buying again.
 
   // RENDER
   return (

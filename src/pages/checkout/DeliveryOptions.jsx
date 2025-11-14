@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
-import { formatMoney } from "../../utils/money";
 import { api } from "../../lib/api";
+import { useCart } from "../../context/CartContext";
+import { formatMoney } from "../../utils/money";
 
-export default function DeliveryOptions({
-  cartItem,
-  deliveryOptions,
-  loadCart,
-}) {
+export default function DeliveryOptions({ cartItem, deliveryOptions }) {
+  // STATE
+  const { loadCart } = useCart(); // Refresh cart via context after updating shipping.
+
+  // RETURN
   return (
     <div className="delivery-options">
       <div className="delivery-options-title">Choose a delivery option:</div>

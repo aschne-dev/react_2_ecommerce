@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router";
 import "./App.css";
-import { api } from "./lib/api";
+import { CartProvider } from "./context/CartProvider";
 import CheckoutPage from "./pages/checkout/CheckoutPage";
 import HomePage from "./pages/home/HomePage";
 import NotFound from "./pages/NotFound";
@@ -9,37 +8,19 @@ import OrdersPage from "./pages/orders/OrdersPage";
 import TrackingPage from "./pages/TrackingPage";
 
 function App() {
-  // STATE
-  const [cart, setCart] = useState([]);
-
-  const loadCart = async () => {
-    const response = await api.get("/cart-items?expand=product");
-    setCart(response.data);
-  };
-
-  // COMPORTEMENTS
-  useEffect(() => {
-    loadCart();
-  }, []);
-
-  // RENDER
   return (
-    <Routes>
-      <Route index element={<HomePage cart={cart} loadCart={loadCart} />} />
-      <Route
-        path="/checkout"
-        element={<CheckoutPage cart={cart} loadCart={loadCart} />}
-      />
-      <Route
-        path="/orders"
-        element={<OrdersPage cart={cart} loadCart={loadCart} />}
-      />
-      <Route
-        path="/tracking/:orderId/:productId"
-        element={<TrackingPage cart={cart} />}
-      />
-      <Route path="*" element={<NotFound cart={cart} />} />
-    </Routes>
+    <CartProvider>
+      <Routes>
+        <Route index element={<HomePage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route
+          path="/tracking/:orderId/:productId"
+          element={<TrackingPage />}
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </CartProvider>
   );
 }
 

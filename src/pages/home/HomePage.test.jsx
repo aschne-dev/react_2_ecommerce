@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CartContext } from "../../context/CartContext";
 import HomePage from "./HomePage";
 
 const mockApi = vi.hoisted(() => ({
@@ -19,9 +20,12 @@ describe("HomePage component", () => {
   let loadCart;
 
   async function renderHomePageAndGetProducts() {
+    const cartContextValue = { cart: [], loadCart };
     render(
       <MemoryRouter>
-        <HomePage cart={[]} loadCart={loadCart} />
+        <CartContext.Provider value={cartContextValue}>
+          <HomePage />
+        </CartContext.Provider>
       </MemoryRouter>
     );
 
