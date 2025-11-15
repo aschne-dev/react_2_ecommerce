@@ -15,9 +15,10 @@ export default function HomePage() {
   useEffect(() => {
     const getHomeData = async () => {
       const response = await api.get(
-        `/products${search ? `?search=${search}` : ""}`
+        `/products${search ? `?search=${search}&` : "?"}limit=50`
       );
-      setProducts(response.data);
+      console.log(response.data);
+      setProducts(response.data.products);
     };
 
     getHomeData();
