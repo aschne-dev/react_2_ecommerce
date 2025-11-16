@@ -7,6 +7,7 @@ import "./HomePage.css";
 import ProductsGrid from "./ProductsGrid";
 
 export default function HomePage() {
+  // Track pagination info and overall request state.
   const [page, setPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -22,6 +23,7 @@ export default function HomePage() {
     setTotalProducts(0);
   }, [search]);
 
+  // Fetch a page of products honoring the current pagination and search query.
   const fetchProducts = useCallback(
     async (abortSignal) => {
       setIsLoading(true);
@@ -57,20 +59,24 @@ export default function HomePage() {
     [page, search]
   );
 
+  // Trigger product fetching on mount and whenever dependencies change.
   useEffect(() => {
     const controller = new AbortController();
     fetchProducts(controller.signal);
     return () => controller.abort();
   }, [fetchProducts]);
 
+  // Determine whether we should keep requesting more data.
   const hasMore = totalProducts === 0 || products.length < totalProducts;
 
+  // Scroll callback to increment the page and fire the next fetch.
   const handleLoadMoreData = () => {
     if (isLoading || !hasMore) return;
     setPage((previousPage) => previousPage + 1);
   };
 
   return (
+    // Render an infinite scroll list composed of Header + ProductsGrid content.
     <InfiniteScroll
       dataLength={products.length}
       next={handleLoadMoreData}
