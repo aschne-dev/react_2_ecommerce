@@ -15,6 +15,8 @@ import logoWhite from "../assets/images/logo-white.png";
 import logoMobileWhite from "../assets/images/mobile-logo-white.png";
 import { useCart } from "../context/CartContext";
 
+// TEST
+
 export default function Header() {
   // STATE
   const { cart } = useCart(); // Read cart count directly from shared context.
