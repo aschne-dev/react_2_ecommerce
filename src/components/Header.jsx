@@ -5,7 +5,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router";
-import "./Header.css";
+import "./header.css";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "react-use";
@@ -14,8 +14,6 @@ import searchIcon from "../assets/images/icons/search-icon.png";
 import logoWhite from "../assets/images/logo-white.png";
 import logoMobileWhite from "../assets/images/mobile-logo-white.png";
 import { useCart } from "../context/CartContext";
-
-// TEST
 
 export default function Header() {
   // STATE
