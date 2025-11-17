@@ -13,11 +13,11 @@ import cartIcon from "../assets/images/icons/cart-icon.png";
 import searchIcon from "../assets/images/icons/search-icon.png";
 import logoWhite from "../assets/images/logo-white.png";
 import logoMobileWhite from "../assets/images/mobile-logo-white.png";
-import { useCart } from "../context/CartContext";
+import { useCartStore } from "../store/CartStore";
 
 export default function Header() {
   // STATE
-  const { cart } = useCart(); // Read cart count directly from shared context.
+  const cart = useCartStore((state) => state.cart);
   // Track route to handle search submissions differently on home vs other pages.
   const location = useLocation();
   const navigate = useNavigate();

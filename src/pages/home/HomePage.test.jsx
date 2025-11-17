@@ -1,8 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CartContext } from "../../context/CartContext";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useCartStore } from "../../store/CartStore";
 import HomePage from "./HomePage";
 
 const mockApi = vi.hoisted(() => ({
@@ -83,14 +83,18 @@ const mockProductsPage2 = [
 
 describe("HomePage component", () => {
   let loadCart;
+  const originalLoadCart = useCartStore.getState().loadCart;
+
+  const resetCartStoreState = () => {
+    useCartStore.setState({ loadCart: originalLoadCart });
+    useCartStore.getState().reset();
+  };
 
   async function renderHomePageAndGetProducts() {
-    const cartContextValue = { cart: [], loadCart };
+    useCartStore.setState({ cart: [], loadCart });
     render(
       <MemoryRouter>
-        <CartContext.Provider value={cartContextValue}>
-          <HomePage />
-        </CartContext.Provider>
+        <HomePage />
       </MemoryRouter>
     );
 
@@ -100,6 +104,7 @@ describe("HomePage component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCartStoreState();
     loadCart = vi.fn();
 
     // Stub the catalog request so we always render a predictable list of products.
@@ -109,6 +114,10 @@ describe("HomePage component", () => {
         pagination: { totalItems: mockProductsPage1.length },
       },
     });
+  });
+
+  afterEach(() => {
+    resetCartStoreState();
   });
 
   it("displays the products correct", async () => {

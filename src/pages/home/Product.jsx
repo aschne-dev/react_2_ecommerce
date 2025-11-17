@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { useCart } from "../../context/CartContext";
+import { useCartStore } from "../../store/CartStore";
 import { buildAssetUrl } from "../../lib/assets";
-import { addProductToCart } from "../../utils/cartActions";
 import { formatMoney } from "../../utils/money";
 
 export default function Product({ product }) {
   //STATE
-  const { loadCart } = useCart(); // Shared cart updater avoids prop drilling.
+  const addProduct = useCartStore((state) => state.addProduct);
   const [quantity, setQuantity] = useState(1);
   const [productAdded, setProductAdded] = useState(false);
 
   // COMPORTEMENTS
   const addToCart = async () => {
-    await addProductToCart(product.id, quantity, loadCart);
+    await addProduct(product.id, quantity);
     setProductAdded(true);
     setTimeout(() => {
       setProductAdded(false);

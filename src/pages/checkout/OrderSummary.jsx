@@ -1,4 +1,4 @@
-import { useCart } from "../../context/CartContext";
+import { useCartStore } from "../../store/CartStore";
 import { api } from "../../lib/api";
 import CartItemDetails from "./CartItemDetails";
 import DeliveryDate from "./DeliveryDate";
@@ -6,7 +6,8 @@ import DeliveryOptions from "./DeliveryOptions";
 
 export default function OrderSummary({ deliveryOptions }) {
   // STATE
-  const { cart, loadCart } = useCart(); // Shared cart data + actions come from context.
+  const cart = useCartStore((state) => state.cart);
+  const loadCart = useCartStore((state) => state.loadCart);
 
   // RENDER
   return (

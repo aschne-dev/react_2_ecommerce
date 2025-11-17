@@ -2,13 +2,12 @@ import dayjs from "dayjs";
 import { Fragment } from "react";
 import { Link } from "react-router";
 import buyAgainIcon from "../../assets/images/icons/buy-again.png";
-import { useCart } from "../../context/CartContext";
+import { useCartStore } from "../../store/CartStore";
 import { buildAssetUrl } from "../../lib/assets";
-import { addProductToCart } from "../../utils/cartActions";
 
 export default function OrderDetailsGrid({ order }) {
   // STATE
-  const { loadCart } = useCart(); // Reuse context action when buying again.
+  const addProduct = useCartStore((state) => state.addProduct);
 
   // RENDER
   return (
@@ -16,7 +15,7 @@ export default function OrderDetailsGrid({ order }) {
       {order.products.map((orderProduct) => {
         // ADD TO CART FUNCTION
         const addToCart = async () => {
-          await addProductToCart(orderProduct.product.id, 1, loadCart);
+          await addProduct(orderProduct.product.id, 1);
         };
 
         return (

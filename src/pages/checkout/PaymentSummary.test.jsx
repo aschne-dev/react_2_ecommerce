@@ -1,8 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CartContext } from "../../context/CartContext";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useCartStore } from "../../store/CartStore";
 import PaymentSummary from "./PaymentSummary";
 
 const mockApi = vi.hoisted(() => ({
@@ -18,21 +18,25 @@ vi.mock("../../lib/api", () => ({
 
 describe("Payment Summary Component", () => {
   let paymentSummary;
+  const originalLoadCart = useCartStore.getState().loadCart;
 
-  async function renderPaymentSummary({ cart = [], loadCart = vi.fn() } = {}) {
+  const resetCartStoreState = () => {
+    useCartStore.setState({ loadCart: originalLoadCart });
+    useCartStore.getState().reset();
+  };
+
+  async function renderPaymentSummary({ cart = [] } = {}) {
     function Location() {
       const location = useLocation();
       return <div data-testid="url-path">{location.pathname}</div>;
     }
 
-    const cartContextValue = { cart, loadCart };
+    useCartStore.setState({ cart });
 
     render(
       <MemoryRouter>
-        <CartContext.Provider value={cartContextValue}>
-          <PaymentSummary paymentSummary={paymentSummary} />
-          <Location />
-        </CartContext.Provider>
+        <PaymentSummary paymentSummary={paymentSummary} />
+        <Location />
       </MemoryRouter>
     );
 
@@ -42,6 +46,7 @@ describe("Payment Summary Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetCartStoreState();
 
     // Shared summary fixture mirrors the API payload structure.
     paymentSummary = {
@@ -52,6 +57,10 @@ describe("Payment Summary Component", () => {
       taxCents: 2088,
       totalCostCents: 22964,
     };
+  });
+
+  afterEach(() => {
+    resetCartStoreState();
   });
 
   it("Displays payment summary correctly", async () => {
@@ -84,7 +93,8 @@ describe("Payment Summary Component", () => {
 
   it("Place the order", async () => {
     const loadCart = vi.fn();
-    await renderPaymentSummary({ loadCart });
+    useCartStore.setState({ loadCart });
+    await renderPaymentSummary();
 
     const user = userEvent.setup();
 
