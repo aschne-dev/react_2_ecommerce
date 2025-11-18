@@ -1,7 +1,5 @@
 [![CI](https://github.com/aschne-dev/react_2_ecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/aschne-dev/react_2_ecommerce/actions/workflows/ci.yml)
 
-# tmp
-
 # Ecommerce React + Vite
 
 Ce projet est basé sur le tutoriel vidéo de [SuperSimpleDev](https://www.youtube.com/watch?v=TtPXvEcE11E&t=41327s). J’en ai gardé l’architecture générale, puis j’ai continué à iterer pour couvrir des cas plus proches d’un vrai projet front, notamment sur la gestion du panier, les requêtes réseau et quelques aspects CI-friendly.
