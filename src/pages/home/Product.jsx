@@ -1,21 +1,44 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useCartStore } from "../../store/CartStore";
 import { buildAssetUrl } from "../../lib/assets";
+import { addCartItem } from "../../lib/api";
+import { useCartStore } from "../../store/CartStore";
 import { formatMoney } from "../../utils/money";
 
 export default function Product({ product }) {
   //STATE
-  const addProduct = useCartStore((state) => state.addProduct);
+  const queryClient = useQueryClient();
+  const setLastAddedProductId = useCartStore(
+    (state) => state.setLastAddedProductId
+  );
   const [quantity, setQuantity] = useState(1);
   const [productAdded, setProductAdded] = useState(false);
 
+  const addToCartMutation = useMutation({
+    mutationFn: addCartItem,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["payment-summary"] }),
+      ]);
+    },
+  });
+
   // COMPORTEMENTS
   const addToCart = async () => {
-    await addProduct(product.id, quantity);
-    setProductAdded(true);
-    setTimeout(() => {
-      setProductAdded(false);
-    }, 2000);
+    try {
+      await addToCartMutation.mutateAsync({
+        productId: product.id,
+        quantity,
+      });
+      setProductAdded(true);
+      setLastAddedProductId(product.id);
+      setTimeout(() => {
+        setProductAdded(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Unable to add product to cart", error);
+    }
   };
 
   const selectQuantity = (event) => {

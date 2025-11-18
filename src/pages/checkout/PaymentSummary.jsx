@@ -1,20 +1,23 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import { useCartStore } from "../../store/CartStore";
-import { api } from "../../lib/api";
+import { createOrder } from "../../lib/api";
 import { formatMoney } from "../../utils/money";
 
 export default function PaymentSummary({ paymentSummary }) {
-  // STATE
-  const loadCart = useCartStore((state) => state.loadCart);
-
-  // COMPORTEMENTS
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const createOrder = async () => {
-    await api.post("/orders");
-    await loadCart();
-    navigate("/orders");
-  };
+  const createOrderMutation = useMutation({
+    mutationFn: createOrder,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["payment-summary"] }),
+        queryClient.invalidateQueries({ queryKey: ["orders"] }),
+      ]);
+      navigate("/orders");
+    },
+  });
 
   // RENDER
   return (
@@ -76,7 +79,8 @@ export default function PaymentSummary({ paymentSummary }) {
           <button
             className="place-order-button button-primary"
             data-testid="create-order-button"
-            onClick={createOrder}
+            onClick={() => createOrderMutation.mutate()}
+            disabled={createOrderMutation.isPending}
           >
             Place your order
           </button>

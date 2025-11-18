@@ -1,18 +1,31 @@
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useParams } from "react-router";
 import Header from "../components/Header";
-import { api } from "../lib/api";
 import { buildAssetUrl } from "../lib/assets";
+import { fetchOrderById } from "../lib/api";
 import "./TrackingPage.css";
 
 export default function TrackingPage() {
-  // IDs coming from the URL (e.g. /tracking/:orderId/:productId)
   const { orderId, productId } = useParams();
-  // Full order returned by the API
-  const [order, setOrder] = useState(null);
-  // Specific product we want to track on this page
-  const [trackedProduct, setTrackedProduct] = useState(null);
+
+  const {
+    data: order,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["order", orderId],
+    queryFn: () => fetchOrderById(orderId),
+    enabled: Boolean(orderId),
+  });
+
+  const trackedProduct = useMemo(() => {
+    if (!order || !productId) return null;
+    return order.products.find(
+      (orderProduct) => orderProduct.productId === productId
+    );
+  }, [order, productId]);
 
   // Memoize delivery progress as long as the order or product stay the same
   const deliveryPercent = useMemo(() => {
@@ -42,25 +55,8 @@ export default function TrackingPage() {
     return "preparing";
   }, [deliveryPercent]);
 
-  // Fetch the order whenever the orderId/productId parameters change
-  useEffect(() => {
-    const fetchTrackingData = async () => {
-      const response = await api.get(`/orders/${orderId}?expand=products`);
-
-      const trackedProductCopy = response.data.products.find(
-        // Pick the product that matches the productId provided in the URL
-        (orderProduct) => orderProduct.productId === productId
-      );
-
-      setOrder(response.data);
-      setTrackedProduct(trackedProductCopy);
-    };
-
-    fetchTrackingData();
-  }, [orderId, productId]);
-
-  // Do not render anything until the order and product have both loaded
-  if (!trackedProduct || !order) return null;
+  if (isLoading) return null;
+  if (error || !trackedProduct || !order) return null;
 
   return (
     <>

@@ -1,19 +1,19 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useCartStore } from "../../store/CartStore";
+import { renderWithQueryClient } from "../../test-utils";
 import HomePage from "./HomePage";
 
-const mockApi = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  delete: vi.fn(),
-}));
+const mockFetchProducts = vi.hoisted(() => vi.fn());
+const mockAddCartItem = vi.hoisted(() => vi.fn());
+const mockFetchCartItems = vi.hoisted(() => vi.fn());
 
 vi.mock("../../lib/api", () => ({
-  api: mockApi,
+  fetchProducts: mockFetchProducts,
+  addCartItem: mockAddCartItem,
+  fetchCartItems: mockFetchCartItems,
 }));
 
 vi.mock("react-infinite-scroll-component", () => ({
@@ -82,17 +82,9 @@ const mockProductsPage2 = [
 ];
 
 describe("HomePage component", () => {
-  let loadCart;
-  const originalLoadCart = useCartStore.getState().loadCart;
-
-  const resetCartStoreState = () => {
-    useCartStore.setState({ loadCart: originalLoadCart });
-    useCartStore.getState().reset();
-  };
 
   async function renderHomePageAndGetProducts() {
-    useCartStore.setState({ cart: [], loadCart });
-    render(
+    renderWithQueryClient(
       <MemoryRouter>
         <HomePage />
       </MemoryRouter>
@@ -104,20 +96,27 @@ describe("HomePage component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    resetCartStoreState();
-    loadCart = vi.fn();
+    useCartStore.getState().reset();
+    mockFetchCartItems.mockResolvedValue([]);
 
     // Stub the catalog request so we always render a predictable list of products.
-    mockApi.get.mockResolvedValue({
-      data: {
-        products: mockProductsPage1,
+    mockFetchProducts.mockImplementation(({ page }) => {
+      if (page === 1) {
+        return Promise.resolve({
+          products: mockProductsPage1,
+          pagination: { totalItems: mockProductsPage1.length },
+        });
+      }
+
+      return Promise.resolve({
+        products: [],
         pagination: { totalItems: mockProductsPage1.length },
-      },
+      });
     });
   });
 
   afterEach(() => {
-    resetCartStoreState();
+    useCartStore.getState().reset();
   });
 
   it("displays the products correct", async () => {
@@ -136,27 +135,26 @@ describe("HomePage component", () => {
   });
 
   it("loads additional products when the infinite scroll requests more data", async () => {
-    mockApi.get.mockResolvedValueOnce({
-      data: {
-        products: mockProductsPage1,
-        pagination: { totalItems: 4 },
-      },
-    });
-    mockApi.get.mockResolvedValueOnce({
-      data: {
+    mockFetchProducts.mockImplementation(({ page }) => {
+      if (page === 1) {
+        return Promise.resolve({
+          products: mockProductsPage1,
+          pagination: { totalItems: 4 },
+        });
+      }
+      return Promise.resolve({
         products: mockProductsPage2,
         pagination: { totalItems: 4 },
-      },
+      });
     });
 
     const firstPageContainers = await renderHomePageAndGetProducts();
     expect(firstPageContainers).toHaveLength(2);
 
-    expect(mockApi.get).toHaveBeenNthCalledWith(
-      1,
-      "/products?page=1",
-      expect.objectContaining({ signal: expect.any(Object) })
-    );
+    expect(mockFetchProducts).toHaveBeenNthCalledWith(1, {
+      page: 1,
+      search: "",
+    });
 
     const user = userEvent.setup();
     await user.click(screen.getByTestId("infinite-scroll-next"));
@@ -166,11 +164,10 @@ describe("HomePage component", () => {
     );
     expect(nextPageProduct).toBeInTheDocument();
 
-    expect(mockApi.get).toHaveBeenNthCalledWith(
-      2,
-      "/products?page=2",
-      expect.objectContaining({ signal: expect.any(Object) })
-    );
+    expect(mockFetchProducts).toHaveBeenNthCalledWith(2, {
+      page: 2,
+      search: "",
+    });
 
     const allProducts = await screen.findAllByTestId("product-container");
     expect(allProducts).toHaveLength(4);
@@ -207,16 +204,14 @@ describe("HomePage component", () => {
     await user.selectOptions(quantitySelector, "3");
     await user.click(addToCartButton);
 
-    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
+    expect(mockAddCartItem).toHaveBeenCalledTimes(2);
+    expect(mockAddCartItem.mock.calls[0][0]).toEqual({
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 2,
     });
-    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
+    expect(mockAddCartItem.mock.calls[1][0]).toEqual({
       productId: "15b6fc6f-327a-4ec4-896f-486349e85a3d",
       quantity: 3,
     });
-
-    // Every submission should refresh the cart summary.
-    expect(loadCart).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   createSearchParams,
   NavLink,
@@ -13,10 +14,18 @@ import cartIcon from "../assets/images/icons/cart-icon.png";
 import searchIcon from "../assets/images/icons/search-icon.png";
 import logoWhite from "../assets/images/logo-white.png";
 import logoMobileWhite from "../assets/images/mobile-logo-white.png";
+import { fetchCartItems } from "../lib/api";
 import { useCartStore } from "../store/CartStore";
 
 export default function Header() {
-  // STATE
+  const setCart = useCartStore((state) => state.setCart);
+  const { data: cartData } = useQuery({
+    queryKey: ["cart"],
+    queryFn: fetchCartItems,
+    onSuccess: (data) => {
+      setCart(data ?? []);
+    },
+  });
   const cart = useCartStore((state) => state.cart);
   // Track route to handle search submissions differently on home vs other pages.
   const location = useLocation();
@@ -37,8 +46,9 @@ export default function Header() {
 
   // Compute cart quantity only when cart entries change.
   const totalQuantity = useMemo(() => {
-    return cart.reduce((sum, cartItem) => sum + cartItem.quantity, 0);
-  }, [cart]);
+    const sourceCart = cartData ?? cart;
+    return sourceCart.reduce((sum, cartItem) => sum + cartItem.quantity, 0);
+  }, [cartData, cart]);
 
   const updateSearchQuery = useCallback(
     (query = "") => {

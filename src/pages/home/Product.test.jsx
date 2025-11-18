@@ -1,29 +1,19 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useCartStore } from "../../store/CartStore";
+import { renderWithQueryClient } from "../../test-utils";
 import Product from "./Product";
 
-const mockApi = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  delete: vi.fn(),
-}));
+const mockAddCartItem = vi.hoisted(() => vi.fn());
 
 vi.mock("../../lib/api", () => ({
-  api: mockApi,
+  addCartItem: mockAddCartItem,
 }));
 
 describe("Product component", () => {
   let product;
   let user;
-  const originalLoadCart = useCartStore.getState().loadCart;
-
-  const resetCartStoreState = () => {
-    useCartStore.setState({ loadCart: originalLoadCart });
-    useCartStore.getState().reset();
-  };
 
   beforeEach(() => {
     // Shared fixture keeps expectations consistent across tests.
@@ -40,16 +30,16 @@ describe("Product component", () => {
     };
 
     vi.clearAllMocks();
-    resetCartStoreState();
     user = userEvent.setup();
+    useCartStore.getState().reset();
   });
 
   afterEach(() => {
-    resetCartStoreState();
+    useCartStore.getState().reset();
   });
 
   it("displays the product details correctly", () => {
-    render(<Product product={product} />);
+    renderWithQueryClient(<Product product={product} />);
 
     // Assert every important product detail renders.
     expect(
@@ -68,10 +58,7 @@ describe("Product component", () => {
   });
 
   it("select a quantity", async () => {
-    const loadCart = vi.fn();
-    useCartStore.setState({ loadCart });
-
-    render(<Product product={product} />);
+    renderWithQueryClient(<Product product={product} />);
 
     const quantitySelector = screen.getByTestId("quantity-selector");
     expect(quantitySelector).toHaveValue("1");
@@ -83,27 +70,24 @@ describe("Product component", () => {
     await user.click(addToCartButton);
 
     // Quantity changes should drive the API payload and trigger a cart reload.
-    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
+    expect(mockAddCartItem).toHaveBeenCalled();
+    expect(mockAddCartItem.mock.calls[0][0]).toEqual({
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 3,
     });
-    expect(loadCart).toHaveBeenCalled();
   });
 
   it("adds a product to the cart", async () => {
-    const loadCart = vi.fn();
-    useCartStore.setState({ loadCart });
-
-    render(<Product product={product} />);
+    renderWithQueryClient(<Product product={product} />);
 
     const addToCartButton = screen.getByTestId("add-to-cart-button");
     await user.click(addToCartButton);
 
     // Default add-to-cart uses quantity 1 and still refreshes cart state.
-    expect(mockApi.post).toHaveBeenCalledWith("/cart-items", {
+    expect(mockAddCartItem).toHaveBeenCalled();
+    expect(mockAddCartItem.mock.calls[0][0]).toEqual({
       productId: "e43638ce-6aa0-4b85-b27f-e1d07eb678c6",
       quantity: 1,
     });
-    expect(loadCart).toHaveBeenCalled();
   });
 });

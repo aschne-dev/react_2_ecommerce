@@ -1,85 +1,53 @@
-import { useCallback, useEffect, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useSearchParams } from "react-router";
 import Header from "../../components/Header";
-import { api } from "../../lib/api";
+import { fetchProducts } from "../../lib/api";
 import "./HomePage.css";
 import ProductsGrid from "./ProductsGrid";
 
 export default function HomePage() {
-  // Track pagination info and overall request state.
-  const [page, setPage] = useState(1);
-  const [products, setProducts] = useState([]);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [searchParams] = useSearchParams();
-  const search = searchParams.get("search");
+  const search = searchParams.get("search") ?? "";
 
-  // Reset pagination results whenever the search query changes.
-  useEffect(() => {
-    setPage(1);
-    setProducts([]);
-    setTotalProducts(0);
-  }, [search]);
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["products", search],
+    queryFn: ({ pageParam = 1 }) => fetchProducts({ page: pageParam, search }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, pages) => {
+      const totalItems = lastPage.pagination?.totalItems ?? 0;
+      const loadedItems = pages.reduce(
+        (sum, page) => sum + page.products.length,
+        0
+      );
 
-  // Fetch a page of products honoring the current pagination and search query.
-  const fetchProducts = useCallback(
-    async (abortSignal) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const params = new URLSearchParams();
-        params.set("page", String(page));
-        if (search) {
-          params.set("search", search);
-        }
-
-        const response = await api.get(`/products?${params.toString()}`, {
-          signal: abortSignal,
-        });
-
-        setProducts((previousProducts) =>
-          page === 1
-            ? response.data.products
-            : [...previousProducts, ...response.data.products]
-        );
-
-        if (page === 1 && response.data.pagination) {
-          setTotalProducts(response.data.pagination.totalItems);
-        }
-      } catch (requestError) {
-        if (requestError.name !== "CanceledError") {
-          setError("Unable to load products. Please try again.");
-        }
-      } finally {
-        setIsLoading(false);
+      if (totalItems === 0) {
+        return lastPage.products.length > 0 ? pages.length + 1 : undefined;
       }
+
+      return loadedItems < totalItems ? pages.length + 1 : undefined;
     },
-    [page, search]
-  );
+  });
 
-  // Trigger product fetching on mount and whenever dependencies change.
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchProducts(controller.signal);
-    return () => controller.abort();
-  }, [fetchProducts]);
+  const products = data?.pages.flatMap((page) => page.products) ?? [];
+  const hasMore = hasNextPage ?? isFetching;
 
-  // Determine whether we should keep requesting more data.
-  const hasMore = totalProducts === 0 || products.length < totalProducts;
-
-  // Scroll callback to increment the page and fire the next fetch.
-  const handleLoadMoreData = () => {
-    if (isLoading || !hasMore) return;
-    setPage((previousPage) => previousPage + 1);
+  const loadMoreProducts = () => {
+    if (!hasNextPage) return;
+    fetchNextPage();
   };
 
   return (
-    // Render an infinite scroll list composed of Header + ProductsGrid content.
     <InfiniteScroll
       dataLength={products.length}
-      next={handleLoadMoreData}
+      next={loadMoreProducts}
       hasMore={hasMore}
       loader={<p>Loading...</p>}
       endMessage={<p>No more data to load.</p>}
@@ -91,8 +59,15 @@ export default function HomePage() {
         <Header />
 
         <div className="home-page">
-          {error ? <p className="error-message">{error}</p> : null}
-          <ProductsGrid products={products} />
+          {isFetching && !isFetchingNextPage && products.length === 0 ? (
+            <p className="loading-message">Chargement...</p>
+          ) : null}
+          {error ? (
+            <p className="error-message">
+              Impossible de charger les produits. Merci de réessayer.
+            </p>
+          ) : null}
+          {products.length > 0 ? <ProductsGrid products={products} /> : null}
         </div>
       </div>
     </InfiniteScroll>
