@@ -34,3 +34,4 @@ Backend : [`https://react-2-ecommerce-backend.onrender.com`](https://react-2-eco
 - `npm run build` : build de production.
 - `npm run preview` : prévisualise le build.
 - `npx vitest run` : exécute la suite de tests.
+  test vercel
