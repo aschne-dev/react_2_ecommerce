@@ -9,6 +9,12 @@ Ce projet est basé sur le tutoriel vidéo de [SuperSimpleDev](https://www.youtu
 Frontend : [https://ecommerce-beta-smoky.vercel.app](https://ecommerce-beta-smoky.vercel.app)  
 Backend : [`https://react-2-ecommerce-backend.onrender.com`](https://react-2-ecommerce-backend.onrender.com/) (Render met l’API en veille ; il faut ouvrir l’URL pour la réactiver avant de tester le front).
 
+## CI + déploiement
+
+- **Workflow GitHub Actions** : [`ci.yml`](.github/workflows/ci.yml) tourne sur chaque `push` ou `pull_request` vers `main`. Il installe les dépendances via `npm ci`, lance `npm run lint`, `npm test` et `npm run build` pour garantir que le bundle reste sain avant tout merge.
+- **Badge de statut** : le badge CI placé en en-tête du README reflète l’état de la dernière exécution du workflow, pratique pour savoir rapidement si la branche principale est “verte”.
+- **Preview sur chaque PR** : Vercel est branché sur le repo GitHub ; à chaque pull request, il déclenche un déploiement de preview et colle l’URL dans la PR. On peut ainsi valider visuellement la branche sans attendre la mise en prod.
+
 ## Ce que j’ai ajouté / modifié
 
 - **Gestion automatique des URLs** : les endpoints (dev vs prod) sont injectés depuis les variables d’environnement, ce qui permet de basculer sans toucher le code.
