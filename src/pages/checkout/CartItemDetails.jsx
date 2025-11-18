@@ -1,14 +1,23 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useCartStore } from "../../store/CartStore";
-import { api } from "../../lib/api";
 import { buildAssetUrl } from "../../lib/assets";
+import { updateCartItemQuantity } from "../../lib/api";
 import { formatMoney } from "../../utils/money";
 
 export default function CartItemDetails({ cartItem, deleteCartItem }) {
-  // STATE
-  const loadCart = useCartStore((state) => state.loadCart);
+  const queryClient = useQueryClient();
   const [showQuantityInput, setShowQuantityInput] = useState(false);
   const [quantity, setQuantity] = useState(cartItem.quantity);
+
+  const updateCartMutation = useMutation({
+    mutationFn: updateCartItemQuantity,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["payment-summary"] }),
+      ]);
+    },
+  });
 
   // COMPORTEMENTS
   const isUpdatingQuantity = () => {
@@ -35,10 +44,14 @@ export default function CartItemDetails({ cartItem, deleteCartItem }) {
 
   const updateCart = async () => {
     const quantitySelected = Number(quantity);
-    await api.put(`/cart-items/${cartItem.product.id}`, {
-      quantity: quantitySelected,
-    });
-    await loadCart();
+    try {
+      await updateCartMutation.mutateAsync({
+        productId: cartItem.product.id,
+        quantity: quantitySelected,
+      });
+    } catch (error) {
+      console.error("Unable to update cart item quantity", error);
+    }
   };
 
   // RENDER

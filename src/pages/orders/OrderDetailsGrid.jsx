@@ -1,21 +1,35 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Fragment } from "react";
 import { Link } from "react-router";
 import buyAgainIcon from "../../assets/images/icons/buy-again.png";
-import { useCartStore } from "../../store/CartStore";
 import { buildAssetUrl } from "../../lib/assets";
+import { addCartItem } from "../../lib/api";
 
 export default function OrderDetailsGrid({ order }) {
-  // STATE
-  const addProduct = useCartStore((state) => state.addProduct);
+  const queryClient = useQueryClient();
+  const addToCartMutation = useMutation({
+    mutationFn: addCartItem,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["payment-summary"] }),
+      ]);
+    },
+  });
 
-  // RENDER
   return (
     <div className="order-details-grid">
       {order.products.map((orderProduct) => {
-        // ADD TO CART FUNCTION
         const addToCart = async () => {
-          await addProduct(orderProduct.product.id, 1);
+          try {
+            await addToCartMutation.mutateAsync({
+              productId: orderProduct.product.id,
+              quantity: 1,
+            });
+          } catch (error) {
+            console.error("Unable to add product to cart from orders", error);
+          }
         };
 
         return (

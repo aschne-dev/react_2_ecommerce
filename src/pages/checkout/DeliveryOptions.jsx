@@ -1,13 +1,20 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { api } from "../../lib/api";
-import { useCartStore } from "../../store/CartStore";
+import { updateCartItemDeliveryOption } from "../../lib/api";
 import { formatMoney } from "../../utils/money";
 
 export default function DeliveryOptions({ cartItem, deliveryOptions }) {
-  // STATE
-  const loadCart = useCartStore((state) => state.loadCart);
+  const queryClient = useQueryClient();
+  const updateDeliveryOptionMutation = useMutation({
+    mutationFn: updateCartItemDeliveryOption,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["payment-summary"] }),
+      ]);
+    },
+  });
 
-  // RETURN
   return (
     <div className="delivery-options">
       <div className="delivery-options-title">Choose a delivery option:</div>
@@ -18,10 +25,14 @@ export default function DeliveryOptions({ cartItem, deliveryOptions }) {
         }
 
         const updateDeliveryOption = async () => {
-          await api.put(`/cart-items/${cartItem.productId}`, {
-            deliveryOptionId: deliveryOption.id,
-          });
-          await loadCart();
+          try {
+            await updateDeliveryOptionMutation.mutateAsync({
+              productId: cartItem.productId,
+              deliveryOptionId: deliveryOption.id,
+            });
+          } catch (error) {
+            console.error("Unable to update delivery option", error);
+          }
         };
 
         return (

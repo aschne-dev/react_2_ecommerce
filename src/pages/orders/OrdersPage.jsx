@@ -1,23 +1,19 @@
 import Header from "../../components/Header";
 import "./OrdersPage.css";
 
-import { useEffect, useState } from "react";
-import { api } from "../../lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchOrders } from "../../lib/api";
 import OrdersGrid from "./OrdersGrid";
 
 export default function OrdersPage() {
-  // STATE
-  const [orders, setOrders] = useState([]);
-
-  // COMPORTEMENTS
-  useEffect(() => {
-    const fetchOrdersData = async () => {
-      const response = await api.get("/orders?expand=products");
-      setOrders(response.data);
-    };
-
-    fetchOrdersData();
-  }, []);
+  const {
+    data: orders,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["orders"],
+    queryFn: fetchOrders,
+  });
 
   // RENDER
   return (
@@ -29,7 +25,13 @@ export default function OrdersPage() {
       <div className="orders-page">
         <div className="page-title">Your Orders</div>
 
-        <OrdersGrid orders={orders} />
+        {isLoading && <p>Chargement...</p>}
+        {error && (
+          <p className="error-message">
+            Impossible de charger vos commandes.
+          </p>
+        )}
+        {orders && <OrdersGrid orders={orders} />}
       </div>
     </>
   );

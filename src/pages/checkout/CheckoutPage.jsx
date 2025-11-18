@@ -1,37 +1,45 @@
-import { useEffect, useState } from "react";
-import { useCartStore } from "../../store/CartStore";
-import { api } from "../../lib/api";
+import { useQuery } from "@tanstack/react-query";
 import CheckoutHeader from "./CheckoutHeader";
 import "./CheckoutPage.css";
 import OrderSummary from "./OrderSummary";
 import PaymentSummary from "./PaymentSummary";
+import { useEffect } from "react";
+import {
+  fetchCartItems,
+  fetchDeliveryOptions,
+  fetchPaymentSummary,
+} from "../../lib/api";
+import { useCartStore } from "../../store/CartStore";
 
 export default function CheckoutPage() {
-  // STATE
-  const cart = useCartStore((state) => state.cart);
-  const [deliveryOptions, setDeliveryOptions] = useState([]);
-  const [paymentSummary, setPaymentSummary] = useState(null);
-
-  // COMPORTEMENTS
-  useEffect(() => {
-    const fetchCheckoutData = async () => {
-      const response = await api.get(
-        "/delivery-options?expand=estimatedDeliveryTime"
-      );
-      setDeliveryOptions(response.data);
-    };
-
-    fetchCheckoutData();
-  }, []);
+  const setCart = useCartStore((state) => state.setCart);
+  const { data: cartData, isLoading: isCartLoading } = useQuery({
+    queryKey: ["cart"],
+    queryFn: fetchCartItems,
+  });
 
   useEffect(() => {
-    const updatePaymentSummary = async () => {
-      const response = await api.get("/payment-summary");
-      setPaymentSummary(response.data);
-    };
+    if (cartData !== undefined) {
+      setCart(cartData ?? []);
+    }
+  }, [cartData, setCart]);
 
-    updatePaymentSummary();
-  }, [cart]);
+  const { data: deliveryOptions, isLoading: isDeliveryOptionsLoading } =
+    useQuery({
+      queryKey: ["delivery-options"],
+      queryFn: fetchDeliveryOptions,
+    });
+
+  const { data: paymentSummary, isLoading: isPaymentSummaryLoading } = useQuery(
+    {
+      queryKey: ["payment-summary"],
+      queryFn: fetchPaymentSummary,
+    }
+  );
+
+  const effectiveDeliveryOptions = deliveryOptions ?? [];
+  const isLoadingCheckoutData =
+    isCartLoading || isDeliveryOptionsLoading || isPaymentSummaryLoading;
 
   // RENDER
   return (
@@ -44,10 +52,14 @@ export default function CheckoutPage() {
 
         <CheckoutHeader paymentSummary={paymentSummary} />
 
-        <div className="checkout-grid">
-          <OrderSummary cart={cart} deliveryOptions={deliveryOptions} />
-          <PaymentSummary paymentSummary={paymentSummary} />
-        </div>
+        {isLoadingCheckoutData ? (
+          <p className="loading-message">Chargement du panier...</p>
+        ) : (
+          <div className="checkout-grid">
+            <OrderSummary deliveryOptions={effectiveDeliveryOptions} />
+            <PaymentSummary paymentSummary={paymentSummary} />
+          </div>
+        )}
       </div>
     </>
   );
