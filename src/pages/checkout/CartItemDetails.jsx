@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useCart } from "../../context/CartContext";
+import { useCartStore } from "../../store/CartStore";
 import { api } from "../../lib/api";
 import { buildAssetUrl } from "../../lib/assets";
 import { formatMoney } from "../../utils/money";
 
 export default function CartItemDetails({ cartItem, deleteCartItem }) {
   // STATE
-  const { loadCart } = useCart(); // Use shared updater to keep everyone in sync.
+  const loadCart = useCartStore((state) => state.loadCart);
   const [showQuantityInput, setShowQuantityInput] = useState(false);
   const [quantity, setQuantity] = useState(cartItem.quantity);
 

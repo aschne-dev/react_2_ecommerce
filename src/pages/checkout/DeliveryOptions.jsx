@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 import { api } from "../../lib/api";
-import { useCart } from "../../context/CartContext";
+import { useCartStore } from "../../store/CartStore";
 import { formatMoney } from "../../utils/money";
 
 export default function DeliveryOptions({ cartItem, deliveryOptions }) {
   // STATE
-  const { loadCart } = useCart(); // Refresh cart via context after updating shipping.
+  const loadCart = useCartStore((state) => state.loadCart);
 
   // RETURN
   return (

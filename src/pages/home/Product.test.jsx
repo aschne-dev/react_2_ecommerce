@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CartContext } from "../../context/CartContext";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useCartStore } from "../../store/CartStore";
 import Product from "./Product";
 
 const mockApi = vi.hoisted(() => ({
@@ -17,8 +17,13 @@ vi.mock("../../lib/api", () => ({
 
 describe("Product component", () => {
   let product;
-  let loadCart;
   let user;
+  const originalLoadCart = useCartStore.getState().loadCart;
+
+  const resetCartStoreState = () => {
+    useCartStore.setState({ loadCart: originalLoadCart });
+    useCartStore.getState().reset();
+  };
 
   beforeEach(() => {
     // Shared fixture keeps expectations consistent across tests.
@@ -35,17 +40,16 @@ describe("Product component", () => {
     };
 
     vi.clearAllMocks();
-    loadCart = vi.fn();
+    resetCartStoreState();
     user = userEvent.setup();
   });
 
+  afterEach(() => {
+    resetCartStoreState();
+  });
+
   it("displays the product details correctly", () => {
-    const cartContextValue = { cart: [], loadCart };
-    render(
-      <CartContext.Provider value={cartContextValue}>
-        <Product product={product} />
-      </CartContext.Provider>
-    );
+    render(<Product product={product} />);
 
     // Assert every important product detail renders.
     expect(
@@ -64,12 +68,10 @@ describe("Product component", () => {
   });
 
   it("select a quantity", async () => {
-    const cartContextValue = { cart: [], loadCart };
-    render(
-      <CartContext.Provider value={cartContextValue}>
-        <Product product={product} />
-      </CartContext.Provider>
-    );
+    const loadCart = vi.fn();
+    useCartStore.setState({ loadCart });
+
+    render(<Product product={product} />);
 
     const quantitySelector = screen.getByTestId("quantity-selector");
     expect(quantitySelector).toHaveValue("1");
@@ -89,12 +91,10 @@ describe("Product component", () => {
   });
 
   it("adds a product to the cart", async () => {
-    const cartContextValue = { cart: [], loadCart };
-    render(
-      <CartContext.Provider value={cartContextValue}>
-        <Product product={product} />
-      </CartContext.Provider>
-    );
+    const loadCart = vi.fn();
+    useCartStore.setState({ loadCart });
+
+    render(<Product product={product} />);
 
     const addToCartButton = screen.getByTestId("add-to-cart-button");
     await user.click(addToCartButton);

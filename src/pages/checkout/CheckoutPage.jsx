@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useCart } from "../../context/CartContext";
+import { useCartStore } from "../../store/CartStore";
 import { api } from "../../lib/api";
 import CheckoutHeader from "./CheckoutHeader";
 import "./CheckoutPage.css";
@@ -8,7 +8,7 @@ import PaymentSummary from "./PaymentSummary";
 
 export default function CheckoutPage() {
   // STATE
-  const { cart } = useCart(); // Context keeps cart total consistent across tabs.
+  const cart = useCartStore((state) => state.cart);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [paymentSummary, setPaymentSummary] = useState(null);
 
